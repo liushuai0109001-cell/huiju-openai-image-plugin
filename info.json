@@ -1,0 +1,4 @@
+{
+  "name": "NewAPI OpenAI 图像插件",
+  "description": "兼容 OpenAI API 的图像生成插件，支持自定义 API 地址和密钥，自动获取可用模型列表"
+}

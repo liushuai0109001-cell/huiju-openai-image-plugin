@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+logs/
+.huiju_face_cover/
+*.tmp
+*.bak
+*.zip
