@@ -38,11 +38,12 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from plugin_utils import load_plugin_config, update_plugin_params
 
 _PLUGIN_FILE = __file__
-_PLUGIN_VERSION = "1.2.4"
+_PLUGIN_VERSION = "1.2.5"
 
 _FACE_CASCADE = None
 _EYE_CASCADE = None
 _EYE_CASCADE_FALLBACK = None
+_PROFILE_FACE_CASCADE = None
 _CHARACTER_IMAGE_ID_PATTERN = re.compile(r"^(?:\d+_)?character_\d+(?:_|$)", re.IGNORECASE)
 _CHARACTER_ROLE_KEYWORDS = (
     "角色设定", "人物设定", "角色图", "角色卡", "角色三视图", "角色四视图",
@@ -434,13 +435,13 @@ def _clamp_box(box: Tuple[int, int, int, int], width: int, height: int) -> Tuple
 
 def _get_face_cascades():
     """Load bundled OpenCV Haar models once; return None when unavailable."""
-    global _FACE_CASCADE, _EYE_CASCADE, _EYE_CASCADE_FALLBACK
+    global _FACE_CASCADE, _EYE_CASCADE, _EYE_CASCADE_FALLBACK, _PROFILE_FACE_CASCADE
     if cv2 is None or np is None:
         return None
     if _FACE_CASCADE is False:
         return None
     if _FACE_CASCADE is not None:
-        return _FACE_CASCADE, _EYE_CASCADE, _EYE_CASCADE_FALLBACK
+        return _FACE_CASCADE, _EYE_CASCADE, _EYE_CASCADE_FALLBACK, _PROFILE_FACE_CASCADE
     try:
         cascade_dir = cv2.data.haarcascades
         # OpenCV 4.8 on Windows cannot open its XML models through this app's
@@ -463,21 +464,43 @@ def _get_face_cascades():
         face = cv2.CascadeClassifier(_cached_model("haarcascade_frontalface_alt2.xml"))
         eye = cv2.CascadeClassifier(_cached_model("haarcascade_eye_tree_eyeglasses.xml"))
         eye_fallback = cv2.CascadeClassifier(_cached_model("haarcascade_eye.xml"))
+        profile = cv2.CascadeClassifier(_cached_model("haarcascade_profileface.xml"))
         if face.empty() or eye.empty():
             raise RuntimeError("OpenCV Haar cascade files are unavailable")
-        _FACE_CASCADE, _EYE_CASCADE, _EYE_CASCADE_FALLBACK = face, eye, eye_fallback
-        return face, eye, eye_fallback
+        _FACE_CASCADE, _EYE_CASCADE = face, eye
+        _EYE_CASCADE_FALLBACK, _PROFILE_FACE_CASCADE = eye_fallback, profile
+        return face, eye, eye_fallback, profile
     except Exception as exc:
         _FACE_CASCADE = False
         _debug_log(f"角色图人脸处理不可用: {exc}")
         return None
 
 
+def _nms_face_boxes(boxes: list, threshold: float = 0.35) -> list:
+    """Remove duplicate front/profile detections while preserving separate poses."""
+    kept = []
+    for box in sorted(boxes, key=lambda item: item[2] * item[3], reverse=True):
+        x, y, box_w, box_h = box
+        duplicate = False
+        for other_x, other_y, other_w, other_h in kept:
+            intersect_x0, intersect_y0 = max(x, other_x), max(y, other_y)
+            intersect_x1 = min(x + box_w, other_x + other_w)
+            intersect_y1 = min(y + box_h, other_y + other_h)
+            intersection = max(0, intersect_x1 - intersect_x0) * max(0, intersect_y1 - intersect_y0)
+            union = box_w * box_h + other_w * other_h - intersection
+            if union and intersection / union >= threshold:
+                duplicate = True
+                break
+        if not duplicate:
+            kept.append(box)
+    return kept
+
+
 def _detect_role_faces(image: Image.Image):
     cascades = _get_face_cascades()
     if cascades is None:
         return None, []
-    face_cascade, _, _ = cascades
+    face_cascade, _, _, profile_cascade = cascades
     rgb = np.asarray(image.convert("RGB"))
     gray = cv2.equalizeHist(cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY))
     height, width = gray.shape[:2]
@@ -488,6 +511,17 @@ def _detect_role_faces(image: Image.Image):
     if found is None or len(found) == 0:
         found = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3, minSize=(minimum, minimum))
     faces = [tuple(map(int, item)) for item in found] if found is not None else []
+    if profile_cascade is not None and not profile_cascade.empty():
+        for source_gray, flipped in ((gray, False), (cv2.flip(gray, 1), True)):
+            profiles = profile_cascade.detectMultiScale(
+                source_gray, scaleFactor=1.05, minNeighbors=3, minSize=(minimum, minimum)
+            )
+            if profiles is None:
+                continue
+            for x, y, face_w, face_h in profiles:
+                x = width - int(x) - int(face_w) if flipped else int(x)
+                faces.append((x, int(y), int(face_w), int(face_h)))
+    faces = _nms_face_boxes(faces)
     if not faces:
         return gray, []
     # Character sheets commonly place the primary portrait on the left. Prefer it,
@@ -501,7 +535,7 @@ def _detect_eye_box(gray, face: Tuple[int, int, int, int], image_size: Tuple[int
     cascades = _get_face_cascades()
     if cascades is None:
         return None
-    _, eye_cascade, eye_fallback = cascades
+    _, eye_cascade, eye_fallback, _ = cascades
     fx, fy, fw, fh = face
     y0, y1 = fy + int(fh * 0.18), fy + int(fh * 0.58)
     x0, x1 = fx + int(fw * 0.08), fx + int(fw * 0.92)
@@ -594,7 +628,7 @@ def _find_empty_eye_paste_area(
 
 
 def _process_character_role_image(image_path: str) -> bool:
-    """Mask a character image's main eyes and atomically replace the saved file."""
+    """Mask every visible pose's eyes and atomically replace the saved file."""
     temporary_path = None
     try:
         if _get_face_cascades() is None:
@@ -607,32 +641,53 @@ def _process_character_role_image(image_path: str) -> bool:
             _debug_log(f"角色图人脸处理跳过，未检测到人脸: {image_path}")
             return False
 
-        face = faces[0]
-        eye_box = _detect_eye_box(gray, face, source.size)
-        if eye_box is None:
-            fx, fy, face_w, face_h = face
-            eye_box = _clamp_box(
-                (fx + int(face_w * 0.18), fy + int(face_h * 0.32), fx + int(face_w * 0.82), fy + int(face_h * 0.48)),
+        primary_face = faces[0]
+
+        def _bar_box_for_face(face, detected_box=None):
+            face_x, face_y, face_w, face_h = face
+            if detected_box is None:
+                if face_w < face_h * 0.9:
+                    detected_box = (
+                        face_x + int(face_w * 0.12), face_y + int(face_h * 0.18),
+                        face_x + int(face_w * 0.92), face_y + int(face_h * 0.40),
+                    )
+                else:
+                    detected_box = (
+                        face_x + int(face_w * 0.18), face_y + int(face_h * 0.22),
+                        face_x + int(face_w * 0.82), face_y + int(face_h * 0.42),
+                    )
+            left, top, right, bottom = detected_box
+            horizontal_padding = max(0, min(20, int(face_w * 0.22)))
+            center_y = (top + bottom) // 2 + 8
+            adaptive_height = max(12, int(face_h * 0.17))
+            bar_height = max(12, min(36, adaptive_height, height))
+            return _clamp_box(
+                (left - horizontal_padding, center_y - bar_height // 2,
+                 right + horizontal_padding, center_y - bar_height // 2 + bar_height),
                 width, height,
             )
-            eye_note = "眼睛定位回退"
-        else:
-            eye_note = "已识别眼睛"
 
-        left, top, right, bottom = eye_box
-        horizontal_padding = max(12, round(width * 0.0195))
-        bar_height = max(12, min(72, round(height * 0.035)))
-        offset_y = round(height * 0.0078)
-        center_y = (top + bottom) // 2 + offset_y
-        bar_box = _clamp_box((left - horizontal_padding, center_y - bar_height // 2, right + horizontal_padding, center_y - bar_height // 2 + bar_height), width, height)
-        crop = source.crop(bar_box)
+        primary_eye_box = _detect_eye_box(gray, primary_face, source.size)
+        primary_bar_box = _bar_box_for_face(primary_face, primary_eye_box)
+        crop = source.crop(primary_bar_box)
         result = source.copy()
         draw = ImageDraw.Draw(result)
-        bx0, by0, bx1, by1 = bar_box
-        radius = max(4, min((by1 - by0) // 2, (bx1 - bx0) // 4, 40))
-        draw.rounded_rectangle((bx0, by0, bx1 - 1, by1 - 1), radius=radius, fill=(0, 0, 0))
+        masked_count = 0
+        detected_count = 0
+        for face in sorted(faces, key=lambda item: (item[0], item[1])):
+            detected_eye_box = _detect_eye_box(gray, face, source.size)
+            # Side-profile detectors can mistake lower body details for faces.
+            if face[1] > height * 0.36 and detected_eye_box is None:
+                continue
+            bar_box = _bar_box_for_face(face, detected_eye_box)
+            bx0, by0, bx1, by1 = bar_box
+            if bx1 - bx0 < 4 or by1 - by0 < 4:
+                continue
+            draw.rectangle((bx0, by0, bx1 - 1, by1 - 1), fill=(0, 0, 0))
+            masked_count += 1
+            detected_count += int(detected_eye_box is not None)
 
-        paste_box = _find_empty_eye_paste_area(source, crop.size, faces, bar_box)
+        paste_box = _find_empty_eye_paste_area(source, crop.size, faces, primary_bar_box)
         if paste_box is not None:
             px0, py0, px1, py1 = paste_box
             result.paste(crop.resize((px1 - px0, py1 - py0), Image.Resampling.LANCZOS), (px0, py0))
@@ -644,9 +699,10 @@ def _process_character_role_image(image_path: str) -> bool:
         os.replace(temporary_path, image_path)
         temporary_path = None
         place_note = "已粘贴到背景空位" if paste_box is not None else "未找到安全空位，仅遮挡眼睛"
-        _debug_log(f"角色图人脸处理完成: {image_path}; {eye_note}; {place_note}")
-        print(f"  [人脸处理] {eye_note}，{place_note}: {os.path.basename(image_path)}")
-        return True
+        detection_note = f"处理 {masked_count} 处眼睛（识别 {detected_count} 处，其余使用定位回退）"
+        _debug_log(f"角色图人脸处理完成: {image_path}; {detection_note}; {place_note}")
+        print(f"  [人脸处理] {detection_note}，{place_note}: {os.path.basename(image_path)}")
+        return masked_count > 0
     except Exception as exc:
         _debug_log(f"角色图人脸处理失败，已保留原图: {image_path}; {exc}")
         print(f"  [人脸处理] 失败，保留原图: {exc}")
