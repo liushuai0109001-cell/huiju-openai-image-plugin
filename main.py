@@ -38,7 +38,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from plugin_utils import load_plugin_config, update_plugin_params
 
 _PLUGIN_FILE = __file__
-_PLUGIN_VERSION = "1.2.9"
+_PLUGIN_VERSION = "1.2.10"
 _UPDATE_REPO = "liushuai0109001-cell/huiju-openai-image-plugin"
 
 _FACE_CASCADE = None

@@ -203,6 +203,19 @@
     var _sdkReady = false;
     var _modelList = [];
     var _refreshTimer = null;
+    var UPDATE_TEXT = {
+      checking: '\u6b63\u5728\u68c0\u67e5\u66f4\u65b0...',
+      autoChecking: '\u6b63\u5728\u81ea\u52a8\u68c0\u67e5\u66f4\u65b0...',
+      downloading: '\u6b63\u5728\u4e0b\u8f7d\u5e76\u66f4\u65b0...',
+      latest: '\u5df2\u7ecf\u662f\u6700\u65b0\u7248\u672c',
+      found: '\u53d1\u73b0\u65b0\u7248\u672c\uff1a',
+      current: '\uff0c\u5f53\u524d\u7248\u672c\uff1a',
+      checkFailed: '\u68c0\u67e5\u5931\u8d25\uff1a',
+      updateComplete: '\u66f4\u65b0\u5b8c\u6210\uff1a',
+      backup: '\uff0c\u5df2\u5907\u4efd\u5230 ',
+      updateFailed: '\u66f4\u65b0\u5931\u8d25\uff1a',
+      unknown: '\u672a\u77e5\u9519\u8bef'
+    };
     var ASPECT_RATIO_OPTIONS = ['1:1', '16:9', '9:16', '4:3', '3:4'];
 
     // ===== 尺寸配置 =====
@@ -571,12 +584,12 @@
 
     // ===== 监听后端动作响应（快速路径） =====
     btnCheckUpdate.addEventListener('click', function () {
-      updateStatus.textContent = '正在检查更新...';
+      updateStatus.textContent = UPDATE_TEXT.checking;
       btnApplyUpdate.disabled = true;
       PluginSDK.sendAction('check_update', {});
     });
     btnApplyUpdate.addEventListener('click', function () {
-      updateStatus.textContent = '正在下载并更新...';
+      updateStatus.textContent = UPDATE_TEXT.downloading;
       btnApplyUpdate.disabled = true;
       PluginSDK.sendAction('apply_update', {});
     });
@@ -596,21 +609,21 @@
       if (data.ok) {
         btnApplyUpdate.disabled = !data.has_update;
         updateStatus.textContent = data.has_update
-          ? ('发现新版本：' + data.latest_version + '，当前版本：' + data.current_version)
-          : (data.message || '已经是最新版本');
+          ? (UPDATE_TEXT.found + data.latest_version + UPDATE_TEXT.current + data.current_version)
+          : UPDATE_TEXT.latest;
       } else {
         btnApplyUpdate.disabled = true;
-        updateStatus.textContent = '检查失败：' + (data.error || '未知错误');
+        updateStatus.textContent = UPDATE_TEXT.checkFailed + (data.error || UPDATE_TEXT.unknown);
       }
     });
 
     PluginSDK.onAction('apply_update_result', function (data) {
       if (data.ok && data.updated) {
-        updateStatus.textContent = '更新完成：' + (data.latest_version || '') + '，已备份到 ' + (data.backup_dir || '');
+        updateStatus.textContent = UPDATE_TEXT.updateComplete + (data.latest_version || '') + UPDATE_TEXT.backup + (data.backup_dir || '');
       } else if (data.ok) {
-        updateStatus.textContent = data.message || '已经是最新版本';
+        updateStatus.textContent = UPDATE_TEXT.latest;
       } else {
-        updateStatus.textContent = '更新失败：' + (data.error || '未知错误');
+        updateStatus.textContent = UPDATE_TEXT.updateFailed + (data.error || UPDATE_TEXT.unknown);
       }
     });
 
@@ -694,7 +707,7 @@
         if (!params.model_list && params.base_url && params.api_key) {
           scheduleAutoRefresh();
         }
-        updateStatus.textContent = '正在自动检查更新...';
+        updateStatus.textContent = UPDATE_TEXT.autoChecking;
         PluginSDK.sendAction('check_update', {});
       });
     }
