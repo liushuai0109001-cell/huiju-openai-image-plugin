@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="GBK">
-  <title>NewAPI OpenAI Í¼Ïñ²å¼ş</title>
+  <meta charset="UTF-8">
+  <title>NewAPI OpenAI å›¾åƒæ’ä»¶</title>
   <link rel="stylesheet" href="../../../plugin-sdk.css">
   <style>
     .api-key-wrapper { position: relative; display: flex; align-items: center; }
@@ -35,8 +35,8 @@
   </style>
 </head>
 <body>
-  <h3>NewAPI OpenAI Í¼Ïñ²å¼ş</h3>
-  <p>¼æÈİ OpenAI API µÄÍ¼ÏñÉú³É²å¼ş£¬Ö§³Ö×Ô¶¨Òå API µØÖ·ºÍÃÜÔ¿£¬×Ô¶¯»ñÈ¡¿ÉÓÃÄ£ĞÍ¡£</p>
+  <h3>NewAPI OpenAI å›¾åƒæ’ä»¶</h3>
+  <p>å…¼å®¹ OpenAI API çš„å›¾åƒç”Ÿæˆæ’ä»¶ï¼Œæ”¯æŒè‡ªå®šä¹‰ API åœ°å€å’Œå¯†é’¥ï¼Œè‡ªåŠ¨è·å–å¯ç”¨æ¨¡å‹ã€‚</p>
   <hr>
 
   <!-- API Key -->
@@ -45,7 +45,7 @@
     <div class="form-control">
       <div class="api-key-wrapper">
         <input type="password" id="apiKeyInput" placeholder="sk-...">
-        <button class="toggle-eye" id="toggleEye" type="button">ÏÔÊ¾</button>
+        <button class="toggle-eye" id="toggleEye" type="button">æ˜¾ç¤º</button>
       </div>
     </div>
   </div>
@@ -58,20 +58,20 @@
     </div>
   </div>
 
-  <!-- Ä£ĞÍÑ¡Ôñ + Ë¢ĞÂ°´Å¥ -->
+  <!-- æ¨¡å‹é€‰æ‹© + åˆ·æ–°æŒ‰é’® -->
   <div class="form-row">
-    <label class="form-label">Ä£ĞÍ</label>
+    <label class="form-label">æ¨¡å‹</label>
     <div class="form-control" style="display:flex;gap:6px;">
       <select id="modelSelect" style="flex:1;">
-        <option value="">ÇëÏÈÅäÖÃ URL ºÍ Key ºó»ñÈ¡</option>
+        <option value="">è¯·å…ˆé…ç½® URL å’Œ Key åè·å–</option>
       </select>
-      <button class="refresh-btn" id="btnRefreshModels" title="´Ó API »ñÈ¡Ä£ĞÍÁĞ±í">Ë¢ĞÂ</button>
+      <button class="refresh-btn" id="btnRefreshModels" title="ä» API è·å–æ¨¡å‹åˆ—è¡¨">åˆ·æ–°</button>
     </div>
   </div>
   <div class="status-msg" id="modelStatus"></div>
 
   <div class="form-row">
-    <label class="form-label">Í¼Æ¬±ÈÀı</label>
+    <label class="form-label">å›¾ç‰‡æ¯”ä¾‹</label>
     <div class="form-control">
       <select id="aspectRatioSelect">
         <option value="1:1">1:1</option>
@@ -83,44 +83,44 @@
     </div>
   </div>
 
-  <!-- ³ß´ç -->
+  <!-- å°ºå¯¸ -->
   <div class="form-row">
-    <label class="form-label">Í¼Æ¬³ß´ç</label>
+    <label class="form-label">å›¾ç‰‡å°ºå¯¸</label>
     <div class="form-control">
       <select id="sizeSelect">
-        <option value="1024x1024">1024x1024£¨·½ĞÎ£©</option>
-        <option value="1792x1024">1792x1024£¨¿íºáÆÁ£©</option>
-        <option value="1024x1792">1024x1792£¨¿íÊúÆÁ£©</option>
+        <option value="1024x1024">1024x1024ï¼ˆæ–¹å½¢ï¼‰</option>
+        <option value="1792x1024">1792x1024ï¼ˆå®½æ¨ªå±ï¼‰</option>
+        <option value="1024x1792">1024x1792ï¼ˆå®½ç«–å±ï¼‰</option>
       </select>
     </div>
   </div>
 
 
-  <!-- ÖÊÁ¿£¨¸ù¾İÄ£ĞÍ¶¯Ì¬ÇĞ»»Ñ¡Ïî£© -->
+  <!-- è´¨é‡ï¼ˆæ ¹æ®æ¨¡å‹åŠ¨æ€åˆ‡æ¢é€‰é¡¹ï¼‰ -->
   <div class="form-row" id="qualityRow">
-    <label class="form-label">Í¼Æ¬ÖÊÁ¿</label>
+    <label class="form-label">å›¾ç‰‡è´¨é‡</label>
     <div class="form-control">
       <select id="qualitySelect">
-        <option value="medium">medium£¨ÖĞµÈ£©</option>
+        <option value="medium">mediumï¼ˆä¸­ç­‰ï¼‰</option>
       </select>
     </div>
   </div>
 
-  <!-- ·ç¸ñ£¨½ö dall-e-3£© -->
+  <!-- é£æ ¼ï¼ˆä»… dall-e-3ï¼‰ -->
   <div class="form-row" id="styleRow">
-    <label class="form-label">Í¼Æ¬·ç¸ñ</label>
+    <label class="form-label">å›¾ç‰‡é£æ ¼</label>
     <div class="form-control">
       <select id="styleSelect">
-        <option value="vivid">vivid£¨Éú¶¯£©</option>
-        <option value="natural">natural£¨×ÔÈ»£©</option>
+        <option value="vivid">vividï¼ˆç”ŸåŠ¨ï¼‰</option>
+        <option value="natural">naturalï¼ˆè‡ªç„¶ï¼‰</option>
       </select>
     </div>
   </div>
 
 
-  <!-- Éú³ÉÊıÁ¿ -->
+  <!-- ç”Ÿæˆæ•°é‡ -->
   <div class="form-row">
-    <label class="form-label">Éú³ÉÊıÁ¿</label>
+    <label class="form-label">ç”Ÿæˆæ•°é‡</label>
     <div class="form-control">
       <select id="nSelect">
         <option value="1">1</option>
@@ -131,62 +131,62 @@
     </div>
   </div>
 
-  <!-- ·µ»Ø¸ñÊ½ -->
+  <!-- è¿”å›æ ¼å¼ -->
   <div class="form-row">
-    <label class="form-label">·µ»Ø¸ñÊ½</label>
+    <label class="form-label">è¿”å›æ ¼å¼</label>
     <div class="form-control">
       <select id="responseFormatSelect">
-        <option value="url">url£¨·µ»ØÏÂÔØÁ´½Ó£©</option>
-        <option value="b64_json">b64_json£¨·µ»ØBase64£©</option>
+        <option value="url">urlï¼ˆè¿”å›ä¸‹è½½é“¾æ¥ï¼‰</option>
+        <option value="b64_json">b64_jsonï¼ˆè¿”å›Base64ï¼‰</option>
       </select>
     </div>
   </div>
 
-  <!-- ³¬Ê± -->
+  <!-- è¶…æ—¶ -->
   <div class="form-row">
-    <label class="form-label">³¬Ê±(Ãë)</label>
+    <label class="form-label">è¶…æ—¶(ç§’)</label>
     <div class="form-control">
       <input type="number" id="timeoutInput" value="300" min="30" max="1800">
     </div>
   </div>
 
   <div class="form-row">
-    <label class="form-label">½ÇÉ«ÈËÁ³´¦Àí</label>
+    <label class="form-label">è§’è‰²äººè„¸å¤„ç†</label>
     <div class="form-control">
       <label class="checkbox-control">
         <input type="checkbox" id="faceProcessingToggle" checked>
-        <span>×Ô¶¯´¦Àí</span>
+        <span>è‡ªåŠ¨å¤„ç†</span>
       </label>
     </div>
   </div>
 
   <hr>
-  <h4>GitHub ×Ô¶¯¸üĞÂ</h4>
+  <h4>GitHub è‡ªåŠ¨æ›´æ–°</h4>
   <div class="form-row">
-    <label class="form-label">²Ö¿â</label>
+    <label class="form-label">ä»“åº“</label>
     <div class="form-control">
       <input type="text" id="updateRepoInput" placeholder="owner/repo">
-      <div class="hint-text">ÌîĞ´ GitHub ²Ö¿â£¬ÀıÈç liushuai0109001-cell/huiju-openai-image-plugin¡£</div>
+      <div class="hint-text">å¡«å†™ GitHub ä»“åº“ï¼Œä¾‹å¦‚ liushuai0109001-cell/huiju-openai-image-pluginã€‚</div>
     </div>
   </div>
   <div class="form-row">
-    <label class="form-label">¸üĞÂ²Ù×÷</label>
+    <label class="form-label">æ›´æ–°æ“ä½œ</label>
     <div class="form-control" style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button type="button" id="btnCheckUpdate">¼ì²é¸üĞÂ</button>
-      <button type="button" id="btnApplyUpdate">ÏÂÔØ²¢¸üĞÂ</button>
+      <button type="button" id="btnCheckUpdate">æ£€æŸ¥æ›´æ–°</button>
+      <button type="button" id="btnApplyUpdate">ä¸‹è½½å¹¶æ›´æ–°</button>
       <div id="updateStatus" class="hint-text" style="flex-basis:100%;margin-top:2px;"></div>
     </div>
   </div>
 
   <div class="hint-text">
-    ¼æÈİ OpenAI / NewAPI ¼°ÆäËû OpenAI ¸ñÊ½µÄÍ¼ÏñÉú³É API¡£<br>
-    ÅäÖÃ API Key ºÍ Base URL ºó£¬µã»÷ <b>Ë¢ĞÂ</b> ×Ô¶¯»ñÈ¡¿ÉÓÃÄ£ĞÍÁĞ±í¡£<br>
-    ĞŞ¸Ä URL »ò Key ºó½«×Ô¶¯´¥·¢Ä£ĞÍÁĞ±íË¢ĞÂ¡£
+    å…¼å®¹ OpenAI / NewAPI åŠå…¶ä»– OpenAI æ ¼å¼çš„å›¾åƒç”Ÿæˆ APIã€‚<br>
+    é…ç½® API Key å’Œ Base URL åï¼Œç‚¹å‡» <b>åˆ·æ–°</b> è‡ªåŠ¨è·å–å¯ç”¨æ¨¡å‹åˆ—è¡¨ã€‚<br>
+    ä¿®æ”¹ URL æˆ– Key åå°†è‡ªåŠ¨è§¦å‘æ¨¡å‹åˆ—è¡¨åˆ·æ–°ã€‚
   </div>
 
   <script src="../../../plugin-sdk.js"></script>
   <script>
-    // ===== DOM ÔªËØ =====
+    // ===== DOM å…ƒç´  =====
     var apiKeyInput = document.getElementById('apiKeyInput');
     var baseUrlInput = document.getElementById('baseUrlInput');
     var modelSelect = document.getElementById('modelSelect');
@@ -213,7 +213,7 @@
     var _refreshTimer = null;
     var ASPECT_RATIO_OPTIONS = ['1:1', '16:9', '9:16', '4:3', '3:4'];
 
-    // ===== ³ß´çÅäÖÃ =====
+    // ===== å°ºå¯¸é…ç½® =====
     var SIZE_OPTIONS = {
       'dall-e-2': ['1K'],
       'dall-e-3': ['1K', '2K', '4K'],
@@ -225,16 +225,16 @@
       '1K': '1K',
       '2K': '2K',
       '4K': '4K',
-      '256x256': '256x256£¨Ğ¡·½ĞÎ£©',
-      '512x512': '512x512£¨ÖĞ·½¿é£©',
-      '1024x1024': '1024x1024£¨·½ĞÎ£©',
-      '1792x1024': '1792x1024£¨¿íºáÆÁ£©',
-      '1024x1792': '1024x1792£¨¿íÊúÆÁ£©',
-      '1536x1024': '1536x1024£¨ºáÆÁ£©',
-      '1024x1536': '1024x1536£¨ÊúÆÁ£©',
+      '256x256': '256x256ï¼ˆå°æ–¹å½¢ï¼‰',
+      '512x512': '512x512ï¼ˆä¸­æ–¹å—ï¼‰',
+      '1024x1024': '1024x1024ï¼ˆæ–¹å½¢ï¼‰',
+      '1792x1024': '1792x1024ï¼ˆå®½æ¨ªå±ï¼‰',
+      '1024x1792': '1024x1792ï¼ˆå®½ç«–å±ï¼‰',
+      '1536x1024': '1536x1024ï¼ˆæ¨ªå±ï¼‰',
+      '1024x1536': '1024x1536ï¼ˆç«–å±ï¼‰',
     };
 
-    // ===== ¹¤¾ßº¯Êı =====
+    // ===== å·¥å…·å‡½æ•° =====
     function setSelectValue(sel, val) {
       if (val == null) return;
       var sv = String(val);
@@ -244,7 +244,7 @@
           return;
         }
       }
-      // Èç¹ûÖµ²»ÔÚÑ¡ÏîÖĞ£¬Ìí¼ÓÒ»¸öÁÙÊ±Ñ¡Ïî
+      // å¦‚æœå€¼ä¸åœ¨é€‰é¡¹ä¸­ï¼Œæ·»åŠ ä¸€ä¸ªä¸´æ—¶é€‰é¡¹
       if (sv && sel !== modelSelect) {
         var opt = document.createElement('option');
         opt.value = sv;
@@ -268,7 +268,7 @@
     }
 
     function normalizeAspectRatio(value) {
-      var raw = String(value || '').trim().toLowerCase().replace(/\s+/g, '').replace('*', 'x').replace('¡Á', 'x');
+      var raw = String(value || '').trim().toLowerCase().replace(/\s+/g, '').replace('*', 'x').replace('Ã—', 'x');
       if (!raw) return '1:1';
       if (raw.indexOf('16:9') !== -1 || raw.indexOf('16x9') !== -1 || raw.indexOf('landscape') !== -1) return '16:9';
       if (raw.indexOf('9:16') !== -1 || raw.indexOf('9x16') !== -1 || raw.indexOf('portrait') !== -1 || raw.indexOf('vertical') !== -1) return '9:16';
@@ -302,15 +302,15 @@
       return raw === '4' || raw === '4000' || raw === '4096' ? '4K' : raw === '2' || raw === '2000' || raw === '2048' ? '2K' : '1K';
     }
 
-    // ÖÊÁ¿Ñ¡ÏîÓ³Éä
+    // è´¨é‡é€‰é¡¹æ˜ å°„
     var DALL_E_QUALITY = [
-      { v: 'standard', t: 'standard£¨±ê×¼£©' },
-      { v: 'hd', t: 'hd£¨¸ßÇå£©' },
+      { v: 'standard', t: 'standardï¼ˆæ ‡å‡†ï¼‰' },
+      { v: 'hd', t: 'hdï¼ˆé«˜æ¸…ï¼‰' },
     ];
     var GPT_IMAGE_QUALITY = [
-      { v: 'low', t: 'low£¨µÍ£©' },
-      { v: 'medium', t: 'medium£¨ÖĞµÈ£©' },
-      { v: 'high', t: 'high£¨¸ß£©' },
+      { v: 'low', t: 'lowï¼ˆä½ï¼‰' },
+      { v: 'medium', t: 'mediumï¼ˆä¸­ç­‰ï¼‰' },
+      { v: 'high', t: 'highï¼ˆé«˜ï¼‰' },
     ];
 
     function populateGptImageQualityOptions() {
@@ -336,7 +336,7 @@
       if (!model) return;
       var ml = model.toLowerCase();
 
-      // ÖÊÁ¿Ñ¡Ïî
+      // è´¨é‡é€‰é¡¹
       if (ml.indexOf('firefly') !== -1) {
         if (canUsePerRequestGptQuality(model)) {
           populateGptImageQualityOptions();
@@ -378,7 +378,7 @@
         qualityRow.style.display = '';
         styleRow.style.display = '';
       } else {
-        // dall-e-2 µÈÆäËûÄ£ĞÍ£º²»·¢ËÍ quality/style
+        // dall-e-2 ç­‰å…¶ä»–æ¨¡å‹ï¼šä¸å‘é€ quality/style
         qualityRow.style.display = 'none';
         styleRow.style.display = 'none';
       }
@@ -405,7 +405,7 @@
       modelStatus.className = 'status-msg ' + (cls || '');
     }
 
-    // ===== Ä£ĞÍÏÂÀ­¿òÌî³ä =====
+    // ===== æ¨¡å‹ä¸‹æ‹‰æ¡†å¡«å…… =====
     function populateModelDropdown(models, defaultModel, currentModel) {
       if (!models || !models.length) return;
       _modelList = models;
@@ -417,7 +417,7 @@
         opt.textContent = m;
         modelSelect.appendChild(opt);
       });
-      // »Ö¸´Ö®Ç°µÄÑ¡Ôñ»òÊ¹ÓÃÄ¬ÈÏ
+      // æ¢å¤ä¹‹å‰çš„é€‰æ‹©æˆ–ä½¿ç”¨é»˜è®¤
       if (curVal && models.indexOf(curVal) !== -1) {
         modelSelect.value = curVal;
       } else if (defaultModel && models.indexOf(defaultModel) !== -1) {
@@ -427,31 +427,31 @@
       }
       PluginSDK.saveParam('model', modelSelect.value);
       updateSizeOptions(modelSelect.value);
-      setStatus('³É¹¦»ñÈ¡ ' + models.length + ' ¸öÄ£ĞÍ', 'success');
+      setStatus('æˆåŠŸè·å– ' + models.length + ' ä¸ªæ¨¡å‹', 'success');
     }
 
-    // ===== Ä£ĞÍË¢ĞÂ =====
+    // ===== æ¨¡å‹åˆ·æ–° =====
     function refreshModels() {
       var baseUrl = baseUrlInput.value.trim();
       var apiKey = apiKeyInput.value.trim();
 
       if (!baseUrl) {
-        setStatus('ÇëÏÈÌîĞ´ Base URL', 'error');
+        setStatus('è¯·å…ˆå¡«å†™ Base URL', 'error');
         return;
       }
 
-      setStatus('<span class="spinner"></span>ÕıÔÚ»ñÈ¡Ä£ĞÍÁĞ±í...', 'loading');
+      setStatus('<span class="spinner"></span>æ­£åœ¨è·å–æ¨¡å‹åˆ—è¡¨...', 'loading');
       btnRefresh.disabled = true;
       modelSelect.disabled = true;
 
-      // ·¢ËÍ»ñÈ¡ÇëÇó
+      // å‘é€è·å–è¯·æ±‚
       PluginSDK.sendAction('fetch_models', {
         base_url: baseUrl,
         api_key: apiKey,
         timeout: 15
       });
 
-      // ÂÖÑ¯ getParams() ×÷Îª»ØÍË»úÖÆ£¬¶ÁÈ¡ºó¶Ë±£´æµ½ config µÄ model_list
+      // è½®è¯¢ getParams() ä½œä¸ºå›é€€æœºåˆ¶ï¼Œè¯»å–åç«¯ä¿å­˜åˆ° config çš„ model_list
       var pollCount = 0;
       var pollMax = 10;
       var pollInterval = 500;
@@ -469,13 +469,13 @@
               }
             } catch (e) {}
           }
-          // Èç¹û pollCount ³¬ÏŞÇÒÓĞ onAction »Øµ÷£¬Í£Ö¹ÂÖÑ¯
+          // å¦‚æœ pollCount è¶…é™ä¸”æœ‰ onAction å›è°ƒï¼Œåœæ­¢è½®è¯¢
           if (pollCount < pollMax) {
             setTimeout(pollModelList, pollInterval);
           } else {
             btnRefresh.disabled = false;
             modelSelect.disabled = false;
-            setStatus('»ñÈ¡³¬Ê±£¬Çë¼ì²é URL ºÍ Key ÊÇ·ñÕıÈ·', 'error');
+            setStatus('è·å–è¶…æ—¶ï¼Œè¯·æ£€æŸ¥ URL å’Œ Key æ˜¯å¦æ­£ç¡®', 'error');
           }
         }).catch(function () {
           if (pollCount < pollMax) {
@@ -483,7 +483,7 @@
           } else {
             btnRefresh.disabled = false;
             modelSelect.disabled = false;
-            setStatus('»ñÈ¡³¬Ê±£¬Çë¼ì²é URL ºÍ Key ÊÇ·ñÕıÈ·', 'error');
+            setStatus('è·å–è¶…æ—¶ï¼Œè¯·æ£€æŸ¥ URL å’Œ Key æ˜¯å¦æ­£ç¡®', 'error');
           }
         });
       })();
@@ -496,20 +496,20 @@
       }, 800);
     }
 
-    // ===== ÊÂ¼ş°ó¶¨ =====
+    // ===== äº‹ä»¶ç»‘å®š =====
 
-    // ÑÛ¾¦ÇĞ»»
+    // çœ¼ç›åˆ‡æ¢
     toggleEye.addEventListener('click', function () {
       if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
-        toggleEye.textContent = 'Òş²Ø';
+        toggleEye.textContent = 'éšè—';
       } else {
         apiKeyInput.type = 'password';
-        toggleEye.textContent = 'ÏÔÊ¾';
+        toggleEye.textContent = 'æ˜¾ç¤º';
       }
     });
 
-    // Base URL / API Key ±ä¸üÊ±×Ô¶¯Ë¢ĞÂÄ£ĞÍ
+    // Base URL / API Key å˜æ›´æ—¶è‡ªåŠ¨åˆ·æ–°æ¨¡å‹
     baseUrlInput.addEventListener('input', function () {
       PluginSDK.saveParam('base_url', baseUrlInput.value);
       scheduleAutoRefresh();
@@ -527,10 +527,10 @@
       PluginSDK.saveParam('api_key', apiKeyInput.value);
     });
 
-    // ÊÖ¶¯Ë¢ĞÂ
+    // æ‰‹åŠ¨åˆ·æ–°
     btnRefresh.addEventListener('click', refreshModels);
 
-    // Ä£ĞÍ±ä¸ü
+    // æ¨¡å‹å˜æ›´
     modelSelect.addEventListener('change', function () {
       PluginSDK.saveParam('model', modelSelect.value);
       updateSizeOptions(modelSelect.value);
@@ -540,35 +540,35 @@
       PluginSDK.saveParam('aspect_ratio', aspectRatioSelect.value);
     });
 
-    // ³ß´ç±ä¸ü
+    // å°ºå¯¸å˜æ›´
     sizeSelect.addEventListener('change', function () {
       PluginSDK.saveParam('size', sizeSelect.value);
       PluginSDK.saveParam('image_size', sizeSelect.value);
       updateModelSpecificOptions(modelSelect.value);
     });
 
-    // ÖÊÁ¿±ä¸ü
+    // è´¨é‡å˜æ›´
     qualitySelect.addEventListener('change', function () {
       PluginSDK.saveParam('quality', qualitySelect.value);
       PluginSDK.saveParam('gpt_image_quality', qualitySelect.value);
     });
 
-    // ·ç¸ñ±ä¸ü
+    // é£æ ¼å˜æ›´
     styleSelect.addEventListener('change', function () {
       PluginSDK.saveParam('style', styleSelect.value);
     });
 
-    // ÊıÁ¿±ä¸ü
+    // æ•°é‡å˜æ›´
     nSelect.addEventListener('change', function () {
       PluginSDK.saveParam('n', nSelect.value);
     });
 
-    // ¸ñÊ½±ä¸ü
+    // æ ¼å¼å˜æ›´
     responseFormatSelect.addEventListener('change', function () {
       PluginSDK.saveParam('response_format', responseFormatSelect.value);
     });
 
-    // ³¬Ê±±ä¸ü
+    // è¶…æ—¶å˜æ›´
     timeoutInput.addEventListener('change', function () {
       PluginSDK.saveParam('timeout', parseInt(timeoutInput.value) || 300);
     });
@@ -577,7 +577,7 @@
       PluginSDK.saveParam('enable_face_processing', faceProcessingToggle.checked);
     });
 
-    // ===== ¼àÌıºó¶Ë¶¯×÷ÏìÓ¦£¨¿ìËÙÂ·¾¶£© =====
+    // ===== ç›‘å¬åç«¯åŠ¨ä½œå“åº”ï¼ˆå¿«é€Ÿè·¯å¾„ï¼‰ =====
     updateRepoInput.addEventListener('change', function () {
       PluginSDK.saveParam('update_repo', updateRepoInput.value.trim());
     });
@@ -585,11 +585,11 @@
       PluginSDK.saveParam('update_repo', updateRepoInput.value.trim());
     });
     btnCheckUpdate.addEventListener('click', function () {
-      updateStatus.textContent = 'ÕıÔÚ¼ì²é¸üĞÂ...';
+      updateStatus.textContent = 'æ­£åœ¨æ£€æŸ¥æ›´æ–°...';
       PluginSDK.sendAction('check_update', { repo: updateRepoInput.value.trim() });
     });
     btnApplyUpdate.addEventListener('click', function () {
-      updateStatus.textContent = 'ÕıÔÚÏÂÔØ²¢¸üĞÂ...';
+      updateStatus.textContent = 'æ­£åœ¨ä¸‹è½½å¹¶æ›´æ–°...';
       PluginSDK.sendAction('apply_update', { repo: updateRepoInput.value.trim() });
     });
 
@@ -599,28 +599,28 @@
       if (data.ok) {
         populateModelDropdown(data.models || [], data.default_model || '', modelSelect.value);
       } else {
-        setStatus('»ñÈ¡Ê§°Ü: ' + (data.error || 'Î´Öª´íÎó'), 'error');
+        setStatus('è·å–å¤±è´¥: ' + (data.error || 'æœªçŸ¥é”™è¯¯'), 'error');
       }
     });
 
-    // ===== ²ÎÊı¶ÁĞ´ =====
+    // ===== å‚æ•°è¯»å†™ =====
     PluginSDK.onAction('check_update_result', function (data) {
       if (data.ok) {
         updateStatus.textContent = data.has_update
-          ? ('·¢ÏÖĞÂ°æ±¾£º' + data.latest_version + '£¬µ±Ç°°æ±¾£º' + data.current_version)
-          : (data.message || 'ÒÑ¾­ÊÇ×îĞÂ°æ±¾');
+          ? ('å‘ç°æ–°ç‰ˆæœ¬ï¼š' + data.latest_version + 'ï¼Œå½“å‰ç‰ˆæœ¬ï¼š' + data.current_version)
+          : (data.message || 'å·²ç»æ˜¯æœ€æ–°ç‰ˆæœ¬');
       } else {
-        updateStatus.textContent = '¼ì²éÊ§°Ü£º' + (data.error || 'Î´Öª´íÎó');
+        updateStatus.textContent = 'æ£€æŸ¥å¤±è´¥ï¼š' + (data.error || 'æœªçŸ¥é”™è¯¯');
       }
     });
 
     PluginSDK.onAction('apply_update_result', function (data) {
       if (data.ok && data.updated) {
-        updateStatus.textContent = '¸üĞÂÍê³É£º' + (data.latest_version || '') + '£¬ÒÑ±¸·İµ½ ' + (data.backup_dir || '');
+        updateStatus.textContent = 'æ›´æ–°å®Œæˆï¼š' + (data.latest_version || '') + 'ï¼Œå·²å¤‡ä»½åˆ° ' + (data.backup_dir || '');
       } else if (data.ok) {
-        updateStatus.textContent = data.message || 'ÒÑ¾­ÊÇ×îĞÂ°æ±¾';
+        updateStatus.textContent = data.message || 'å·²ç»æ˜¯æœ€æ–°ç‰ˆæœ¬';
       } else {
-        updateStatus.textContent = '¸üĞÂÊ§°Ü£º' + (data.error || 'Î´Öª´íÎó');
+        updateStatus.textContent = 'æ›´æ–°å¤±è´¥ï¼š' + (data.error || 'æœªçŸ¥é”™è¯¯');
       }
     });
 
@@ -649,7 +649,7 @@
         baseUrlInput.value = params.base_url;
       }
       
-      // »Ö¸´»º´æµÄÄ£ĞÍÁĞ±í
+      // æ¢å¤ç¼“å­˜çš„æ¨¡å‹åˆ—è¡¨
       if (params.model_list) {
         try {
           var cachedModels = JSON.parse(params.model_list);
@@ -660,7 +660,7 @@
       }
       
       if (params.model && modelSelect.options.length <= 1 && (!_modelList.length || _modelList.indexOf(params.model) === -1)) {
-        // Èç¹ûÄ£ĞÍÁĞ±íÎª¿Õ»ò²»°üº¬µ±Ç°Ä£ĞÍ£¬Ìí¼ÓÎªÁÙÊ±Ñ¡Ïî
+        // å¦‚æœæ¨¡å‹åˆ—è¡¨ä¸ºç©ºæˆ–ä¸åŒ…å«å½“å‰æ¨¡å‹ï¼Œæ·»åŠ ä¸ºä¸´æ—¶é€‰é¡¹
         var found = false;
         for (var i = 0; i < modelSelect.options.length; i++) {
           if (modelSelect.options[i].value === params.model) { found = true; break; }
@@ -686,7 +686,7 @@
         ? true
         : !(params.enable_face_processing === false || String(params.enable_face_processing).toLowerCase() === 'false' || String(params.enable_face_processing) === '0');
 
-      // ¸üĞÂ³ß´çÑ¡Ïî
+      // æ›´æ–°å°ºå¯¸é€‰é¡¹
       if (params.update_repo != null) updateRepoInput.value = params.update_repo;
       updateSizeOptions(params.model || modelSelect.value);
       setSelectValue(aspectRatioSelect, normalizeAspectRatio(params.aspect_ratio || params.size));
@@ -697,19 +697,19 @@
     window.get_plugin_params = getParams;
     window.set_plugin_params = setParams;
 
-    // ===== SDK ³õÊ¼»¯ =====
+    // ===== SDK åˆå§‹åŒ– =====
     if (typeof PluginSDK !== 'undefined' && PluginSDK.onReady) {
       PluginSDK.onReady(function (params) {
         _sdkReady = true;
         setParams(params);
-        // Èç¹ûÓĞ»º´æµÄÄ£ĞÍÁĞ±í¾Í²»ÔÙ×Ô¶¯Ë¢ĞÂ£»·ñÔòÓĞ URL ºÍ Key ¾ÍË¢ĞÂ
+        // å¦‚æœæœ‰ç¼“å­˜çš„æ¨¡å‹åˆ—è¡¨å°±ä¸å†è‡ªåŠ¨åˆ·æ–°ï¼›å¦åˆ™æœ‰ URL å’Œ Key å°±åˆ·æ–°
         if (!params.model_list && params.base_url && params.api_key) {
           scheduleAutoRefresh();
         }
       });
     }
 
-    // ===== Ä¬ÈÏ³õÊ¼»¯ =====
+    // ===== é»˜è®¤åˆå§‹åŒ– =====
     updateSizeOptions('dall-e-3');
   </script>
 </body>
