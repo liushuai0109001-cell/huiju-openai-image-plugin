@@ -38,7 +38,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from plugin_utils import load_plugin_config, update_plugin_params
 
 _PLUGIN_FILE = __file__
-_PLUGIN_VERSION = "1.2.3"
+_PLUGIN_VERSION = "1.2.4"
 
 _FACE_CASCADE = None
 _EYE_CASCADE = None
@@ -286,7 +286,13 @@ def _get_latest_release(repo: str, timeout: int = 20) -> dict:
         return {"ok": False, "error": f"GitHub 返回 HTTP {resp.status_code}: {resp.text[:200]}"}
     release = resp.json()
     latest = str(release.get("tag_name") or "").lstrip("v")
-    assets = release.get("assets") or []
+    assets = [
+        {"name": item.get("name") or "", "download_url": item.get("browser_download_url") or ""}
+        for item in (release.get("assets") or [])
+        if item.get("browser_download_url")
+    ]
+    if not assets and release.get("zipball_url"):
+        assets.append({"name": f"{release.get('tag_name') or 'source'}.zip", "download_url": release.get("zipball_url")})
     return {
         "ok": True,
         "repo": repo,
@@ -295,11 +301,7 @@ def _get_latest_release(repo: str, timeout: int = 20) -> dict:
         "has_update": bool(latest and _version_tuple(latest) > _version_tuple(_PLUGIN_VERSION)),
         "release_name": release.get("name") or release.get("tag_name") or "",
         "html_url": release.get("html_url") or "",
-        "assets": [
-            {"name": item.get("name") or "", "download_url": item.get("browser_download_url") or ""}
-            for item in assets
-            if item.get("browser_download_url")
-        ],
+        "assets": assets,
     }
 
 
