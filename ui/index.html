@@ -163,17 +163,10 @@
   <hr>
   <h4>GitHub 自动更新</h4>
   <div class="form-row">
-    <label class="form-label">仓库</label>
-    <div class="form-control">
-      <input type="text" id="updateRepoInput" placeholder="owner/repo">
-      <div class="hint-text">填写 GitHub 仓库，例如 liushuai0109001-cell/huiju-openai-image-plugin。</div>
-    </div>
-  </div>
-  <div class="form-row">
-    <label class="form-label">更新操作</label>
+    <label class="form-label">版本更新</label>
     <div class="form-control" style="display:flex;gap:6px;flex-wrap:wrap;">
       <button type="button" id="btnCheckUpdate">检查更新</button>
-      <button type="button" id="btnApplyUpdate">下载并更新</button>
+      <button type="button" id="btnApplyUpdate" disabled>下载并更新</button>
       <div id="updateStatus" class="hint-text" style="flex-basis:100%;margin-top:2px;"></div>
     </div>
   </div>
@@ -203,7 +196,6 @@
     var modelStatus = document.getElementById('modelStatus');
     var qualityRow = document.getElementById('qualityRow');
     var styleRow = document.getElementById('styleRow');
-    var updateRepoInput = document.getElementById('updateRepoInput');
     var btnCheckUpdate = document.getElementById('btnCheckUpdate');
     var btnApplyUpdate = document.getElementById('btnApplyUpdate');
     var updateStatus = document.getElementById('updateStatus');
@@ -578,19 +570,15 @@
     });
 
     // ===== 监听后端动作响应（快速路径） =====
-    updateRepoInput.addEventListener('change', function () {
-      PluginSDK.saveParam('update_repo', updateRepoInput.value.trim());
-    });
-    updateRepoInput.addEventListener('blur', function () {
-      PluginSDK.saveParam('update_repo', updateRepoInput.value.trim());
-    });
     btnCheckUpdate.addEventListener('click', function () {
       updateStatus.textContent = '正在检查更新...';
-      PluginSDK.sendAction('check_update', { repo: updateRepoInput.value.trim() });
+      btnApplyUpdate.disabled = true;
+      PluginSDK.sendAction('check_update', {});
     });
     btnApplyUpdate.addEventListener('click', function () {
       updateStatus.textContent = '正在下载并更新...';
-      PluginSDK.sendAction('apply_update', { repo: updateRepoInput.value.trim() });
+      btnApplyUpdate.disabled = true;
+      PluginSDK.sendAction('apply_update', {});
     });
 
     PluginSDK.onAction('fetch_models_result', function (data) {
@@ -606,10 +594,12 @@
     // ===== 参数读写 =====
     PluginSDK.onAction('check_update_result', function (data) {
       if (data.ok) {
+        btnApplyUpdate.disabled = !data.has_update;
         updateStatus.textContent = data.has_update
           ? ('发现新版本：' + data.latest_version + '，当前版本：' + data.current_version)
           : (data.message || '已经是最新版本');
       } else {
+        btnApplyUpdate.disabled = true;
         updateStatus.textContent = '检查失败：' + (data.error || '未知错误');
       }
     });
@@ -639,7 +629,6 @@
         response_format: responseFormatSelect.value,
         timeout: timeoutInput.value,
         enable_face_processing: faceProcessingToggle.checked,
-        update_repo: updateRepoInput.value.trim(),
       };
     }
 
@@ -687,7 +676,6 @@
         : !(params.enable_face_processing === false || String(params.enable_face_processing).toLowerCase() === 'false' || String(params.enable_face_processing) === '0');
 
       // 更新尺寸选项
-      if (params.update_repo != null) updateRepoInput.value = params.update_repo;
       updateSizeOptions(params.model || modelSelect.value);
       setSelectValue(aspectRatioSelect, normalizeAspectRatio(params.aspect_ratio || params.size));
       setSelectValue(sizeSelect, normalizeImageSize(params.image_size || params.size));
@@ -706,6 +694,8 @@
         if (!params.model_list && params.base_url && params.api_key) {
           scheduleAutoRefresh();
         }
+        updateStatus.textContent = '正在自动检查更新...';
+        PluginSDK.sendAction('check_update', {});
       });
     }
 

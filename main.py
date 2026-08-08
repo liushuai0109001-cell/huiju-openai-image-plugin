@@ -38,7 +38,8 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from plugin_utils import load_plugin_config, update_plugin_params
 
 _PLUGIN_FILE = __file__
-_PLUGIN_VERSION = "1.2.8"
+_PLUGIN_VERSION = "1.2.9"
+_UPDATE_REPO = "liushuai0109001-cell/huiju-openai-image-plugin"
 
 _FACE_CASCADE = None
 _EYE_CASCADE = None
@@ -68,7 +69,7 @@ _DEFAULT_PARAMS = {
     "response_format": "url",
     "timeout": 300,
     "enable_face_processing": True,
-    "update_repo": "liushuai0109001-cell/huiju-openai-image-plugin",
+    "update_repo": _UPDATE_REPO,
     "update_asset_name": "",
 }
 
@@ -279,13 +280,36 @@ def _normalize_update_repo(value: str) -> str:
 def _get_latest_release(repo: str, timeout: int = 20) -> dict:
     repo = _normalize_update_repo(repo)
     if not repo or "/" not in repo:
-        return {"ok": False, "error": "请先填写 GitHub 仓库，例如 owner/repo"}
-    url = f"https://api.github.com/repos/{repo}/releases/latest"
+        return {"ok": False, "error": "插件内置更新源无效"}
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "huiju-image-plugin-updater"}
-    resp = requests.get(url, headers=headers, timeout=timeout, proxies={"http": None, "https": None})
-    if resp.status_code != 200:
-        return {"ok": False, "error": f"GitHub 返回 HTTP {resp.status_code}: {resp.text[:200]}"}
-    release = resp.json()
+    release_url = f"https://api.github.com/repos/{repo}/releases/latest"
+    release_resp = requests.get(release_url, headers=headers, timeout=timeout, proxies={"http": None, "https": None})
+    release = release_resp.json() if release_resp.status_code == 200 else {}
+
+    tags_url = f"https://api.github.com/repos/{repo}/tags?per_page=30"
+    tags_resp = requests.get(tags_url, headers=headers, timeout=timeout, proxies={"http": None, "https": None})
+    tags = tags_resp.json() if tags_resp.status_code == 200 else []
+    valid_tags = [item for item in tags if isinstance(item, dict) and item.get("name") and item.get("zipball_url")]
+    latest_tag = max(valid_tags, key=lambda item: _version_tuple(item.get("name")), default={})
+
+    release_tag = str(release.get("tag_name") or "")
+    tag_name = str(latest_tag.get("name") or "")
+    if tag_name and (not release_tag or _version_tuple(tag_name) > _version_tuple(release_tag)):
+        latest = tag_name.lstrip("vV")
+        return {
+            "ok": True,
+            "repo": repo,
+            "current_version": _PLUGIN_VERSION,
+            "latest_version": latest,
+            "has_update": _version_tuple(latest) > _version_tuple(_PLUGIN_VERSION),
+            "release_name": tag_name,
+            "html_url": f"https://github.com/{repo}/tree/{tag_name}",
+            "assets": [{"name": f"{tag_name}.zip", "download_url": latest_tag["zipball_url"]}],
+        }
+    if not release:
+        error_status = release_resp.status_code if release_resp.status_code != 404 else tags_resp.status_code
+        return {"ok": False, "error": f"GitHub 更新源不可用，HTTP {error_status}"}
+
     latest = str(release.get("tag_name") or "").lstrip("v")
     assets = [
         {"name": item.get("name") or "", "download_url": item.get("browser_download_url") or ""}
@@ -1615,16 +1639,14 @@ def handle_action(action, data=None):
             return {"ok": False, "error": result.get("error", "未知错误")}
     
     elif action == "check_update":
-        repo = str(data.get("repo") or get_params().get("update_repo") or "").strip()
-        result = _get_latest_release(repo, int(data.get("timeout", 20) or 20))
+        result = _get_latest_release(_UPDATE_REPO, int(data.get("timeout", 20) or 20))
         if result.get("ok") and not result.get("has_update"):
             result["message"] = "已经是最新版本"
         return result
 
     elif action == "apply_update":
-        repo = str(data.get("repo") or get_params().get("update_repo") or "").strip()
         asset_name = str(data.get("asset_name") or get_params().get("update_asset_name") or "").strip()
-        return _apply_github_update(repo, asset_name)
+        return _apply_github_update(_UPDATE_REPO, asset_name)
 
     elif action == "get_size_options":
         model = str(data.get("model", _get_model_from_config())).strip()
