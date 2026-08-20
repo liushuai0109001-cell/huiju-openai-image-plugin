@@ -38,7 +38,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from plugin_utils import load_plugin_config, update_plugin_params
 
 _PLUGIN_FILE = __file__
-_PLUGIN_VERSION = "1.2.10"
+_PLUGIN_VERSION = "1.2.11"
 _UPDATE_REPO = "liushuai0109001-cell/huiju-openai-image-plugin"
 
 _FACE_CASCADE = None
@@ -135,11 +135,11 @@ _GPT_IMAGE_SIZE_MAP: Dict[Tuple[str, str], str] = {
     ("1:1", "1K"): "1024x1024",
     ("1:1", "2K"): "2048x2048",
     ("1:1", "4K"): "4096x4096",
-    ("16:9", "1K"): "1536x1024",
-    ("16:9", "2K"): "3072x2048",
+    ("16:9", "1K"): "1536x864",
+    ("16:9", "2K"): "2048x1152",
     ("16:9", "4K"): "4096x2304",
-    ("9:16", "1K"): "1024x1536",
-    ("9:16", "2K"): "2048x3072",
+    ("9:16", "1K"): "864x1536",
+    ("9:16", "2K"): "1152x2048",
     ("9:16", "4K"): "2304x4096",
     ("4:3", "1K"): "1408x1056",
     ("4:3", "2K"): "2816x2112",
